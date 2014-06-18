@@ -29,18 +29,14 @@ class UDReselling(object):
 	def readConfigFile(self):
 		try:
 			self.config = json.loads(open(self.configfile).read())
+
+			if 'url' in self.config:
+				self.setURL(self.config['url'])
+			if 's_login' in self.config and 's_pw' in self.config:
+				self.setCredentials(self.config['s_login'], self.config['s_pw'])
 		except FileNotFoundError:
 			print('Could not find config file.')
 			sys.exit(2)
-
-	def readURLFromConfigFile(self):
-		if 'url' in self.config:
-			self.url = self.config['url']
-
-	def readCredentialsFromConfigFile(self):
-		for c in self.config:
-			if c != 'url':
-				self.addArg(c, self.config[c])
 
 	def readCmdLineArgs(self):
 		numberOfArguments = len(sys.argv)
@@ -142,8 +138,6 @@ class UDReselling(object):
 
 	def run(self):
 		self.readConfigFile()
-		self.readURLFromConfigFile()
-		self.readCredentialsFromConfigFile()
 		self.readCmdLineArgs()
 		self.checkRequest()
 		self.sendRequest()
