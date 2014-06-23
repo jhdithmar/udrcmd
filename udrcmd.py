@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, urllib, urllib3, re, json
+import sys, urllib, urllib3, re, json, getopt
 from pprint import pprint
 
 class splitArgException(Exception):
@@ -39,9 +39,10 @@ class UDReselling(object):
 			sys.exit(2)
 
 	def readCmdLineArgs(self):
-		numberOfArguments = len(sys.argv)
+		options, args = getopt.gnu_getopt(sys.argv[1:], 'l:p:', ['login=', 'password=', 'command=', 'contact=', 'domain=', 'nameserver=', 'transferlock='])
+		numberOfArguments = len(options) + len(args)
 
-		if numberOfArguments < 2:
+		if numberOfArguments == 0:
 			print('Too few arguments. Let\'s try interactive mode. End with "EOF" (without quotes)')
 			eof_re = re.compile('^EOF$')
 			for line in sys.stdin:
@@ -51,15 +52,33 @@ class UDReselling(object):
 					(ky, vl) = self.splitArg(line.rstrip())
 					self.addArg(ky, vl)
 		else:
-			# shortcut: first parameter is command
-			command_firstarg_re = re.compile('^(command\=|[^\=])', re.DOTALL | re.M)
-			if command_firstarg_re.match(sys.argv[1]):
-				command_equals_re = re.compile('command=', re.DOTALL | re.M)
-				self.addArg('command', command_equals_re.sub('', sys.argv[1]))
+			if len(args) > 0:
+				command_firstarg_re = re.compile('^(command\=.+|[^\=]+)$', re.DOTALL | re.M)
+				for i in range(0, len(args)):
+					# shortcut: first parameter is command
+					if i == 0 and command_firstarg_re.match(args[i]):
+						command_equals_re = re.compile('command=', re.DOTALL | re.M)
+						self.addArg('command', command_equals_re.sub('', args[i]))
+					else:
+						(ky, vl) = self.splitArg(args[i])
+						self.addArg(ky, vl)
 
-			for i in range(2, numberOfArguments):
-				(ky, vl) = self.splitArg(sys.argv[i])
-				self.addArg(ky, vl)
+			options_re = re.compile('^\-\-(.+)$')
+			option_value_split_re = re.compile('\;', re.DOTALL | re.M)
+			for opt, arg in options:
+				options_re_match = options_re.match(opt)
+				if opt in ('-l', '--login'):
+					self.addArg('s_login', arg)
+				elif opt in ('-p', '--password'):
+					self.addArg('s_pw', arg)
+				elif options_re_match != None:
+					arg_list = option_value_split_re.split(arg)
+					o = options_re_match.group(1)
+					if len(arg_list) > 1:
+						for i in range(0, len(arg_list)):
+							self.addArg(o + str(i), arg_list[i])
+					elif len(arg_list) == 1:
+						self.addArg(o, arg_list[0])
 
 	def splitArg(self, arg):
 		arg_re = re.compile('\s*=\s*', re.DOTALL | re.M)
@@ -76,6 +95,9 @@ class UDReselling(object):
 		return(a[0], a[1])
 
 	def addArg(self, ky, vl):
+		options_re = re.compile('^\=\=?')
+		if options_re.match(ky):
+			return
 		self.query_args[ky] = vl
 
 	def printArgs(self):
