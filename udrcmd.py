@@ -43,23 +43,27 @@ class UDReselling(object):
 
 		if numberOfArguments < 2:
 			print('Too few arguments. Let\'s try interactive mode. End with "EOF" (without quotes)')
+			eof_re = re.compile('^EOF$')
 			for line in sys.stdin:
-				if re.match('^EOF$', line):
+				if eof_re.match(line):
 					break
 				else:
 					(ky, vl) = self.splitArg(line.rstrip())
 					self.addArg(ky, vl)
 		else:
 			# shortcut: first parameter is command
-			if '=' not in sys.argv[1] or 'command=' in sys.argv[1]:
-				self.addArg('command', re.sub('command=', '', sys.argv[1]))
+			command_firstarg_re = re.compile('^(command\=|[^\=])', re.DOTALL | re.M)
+			if command_firstarg_re.match(sys.argv[1]):
+				command_equals_re = re.compile('command=', re.DOTALL | re.M)
+				self.addArg('command', command_equals_re.sub('', sys.argv[1]))
 
 			for i in range(2, numberOfArguments):
 				(ky, vl) = self.splitArg(sys.argv[i])
 				self.addArg(ky, vl)
 
 	def splitArg(self, arg):
-		a = re.split('\s*=\s*', arg)
+		arg_re = re.compile('\s*=\s*', re.DOTALL | re.M)
+		a = arg_re.split(arg)
 
 		# in this case we don't want to see the traceback
 		try:
@@ -95,18 +99,24 @@ class UDReselling(object):
 		res = self.raw_response
 
 		# prepare string to be parsed
-		res = re.sub('\[RESPONSE\]\\n', '', res)
-		res = re.sub('\\nEOF\\n', '', res)
-		res = re.sub('\\t', '', res)
-		res = re.sub('\\n\\n', '\\n', res)
-		res = re.split('\\n', res)
+		pr_response_re = re.compile('\[RESPONSE\]\\n', re.DOTALL | re.M)
+		pr_eof_re = re.compile('\\nEOF\\n', re.DOTALL | re.M)
+		pr_tab_re = re.compile('\\t', re.DOTALL | re.M)
+		pr_double_newline_re = re.compile('\\n\\n', re.DOTALL | re.M)
+		pr_newline_re = re.compile('\\n', re.DOTALL | re.M)
+		res = pr_response_re.sub('', res)
+		res = pr_eof_re.sub('', res)
+		res = pr_tab_re.sub('', res)
+		res = pr_double_newline_re.sub('\\n', res)
+		res = pr_newline_re.split(res)
 
 		# build response dictionary
 		r = {}
+		bracket_re = re.compile('\[', re.DOTALL | re.M)
 		for el in res:
 			if len(el) == 0:
 				pass
-			elif re.search('\[', el):
+			elif bracket_re.search(el):
 				el_re = re.compile('^(.+)\[(.+)\]\[.+\]\s*=\s*(.*)$', re.DOTALL | re.M)
 				res_el = el_re.search(el)
 
