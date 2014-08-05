@@ -15,6 +15,7 @@ class UDReselling(object):
 		self.url = url
 		self.configfile = configfile
 		self.query_args = {}
+		self.print_raw_response = 0
 
 	def setURL(self, url):
 		self.url = url
@@ -39,7 +40,7 @@ class UDReselling(object):
 			sys.exit(2)
 
 	def readCmdLineArgs(self):
-		options, args = getopt.gnu_getopt(sys.argv[1:], 'l:p:', ['login=', 'password=', 'command=', 'contact=', 'domain=', 'nameserver=', 'transferlock='])
+		options, args = getopt.gnu_getopt(sys.argv[1:], 'l:p:r', ['login=', 'password=', 'command=', 'contact=', 'domain=', 'nameserver=', 'transferlock=', 'raw-response'])
 		numberOfArguments = len(options) + len(args)
 
 		if numberOfArguments == 0:
@@ -71,6 +72,8 @@ class UDReselling(object):
 					self.addArg('s_login', arg)
 				elif opt in ('-p', '--password'):
 					self.addArg('s_pw', arg)
+				elif opt in ('-r', '--raw-response'):
+					self.print_raw_response = 1
 				elif options_re_match != None:
 					arg_list = option_value_split_re.split(arg)
 					o = options_re_match.group(1)
@@ -119,6 +122,9 @@ class UDReselling(object):
 
 	def parseResponse(self):
 		res = self.raw_response
+		if self.print_raw_response == 1:
+			print(res)
+			return
 
 		# prepare string to be parsed
 		pr_response_re = re.compile('\[RESPONSE\]\\n', re.DOTALL | re.M)
