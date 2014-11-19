@@ -40,7 +40,7 @@ class UDReselling(object):
 			sys.exit(2)
 
 	def readCmdLineArgs(self):
-		options, args = getopt.gnu_getopt(sys.argv[1:], 'l:p:r', ['login=', 'password=', 'command=', 'contact=', 'domain=', 'nameserver=', 'transferlock=', 'raw-response'])
+		options, args = getopt.gnu_getopt(sys.argv[1:], 'l:p:rc', ['login=', 'password=', 'command=', 'contact=', 'domain=', 'nameserver=', 'transferlock=', 'raw-response', 'credentials'])
 		numberOfArguments = len(options) + len(args)
 
 		if numberOfArguments == 0:
@@ -74,6 +74,10 @@ class UDReselling(object):
 					self.addArg('s_pw', arg)
 				elif opt in ('-r', '--raw-response'):
 					self.print_raw_response = 1
+				elif opt in ('-c', '--credentials'):
+					# ask for credentials
+					self.addArg('s_login', input('Login   : '))
+					self.addArg('s_pw', input('Password: '))
 				elif options_re_match != None:
 					arg_list = option_value_split_re.split(arg)
 					o = options_re_match.group(1)
