@@ -119,11 +119,11 @@ class UDReselling(object):
 
 	def checkRequest(self):
 		if 's_login' not in self.query_args:
-			raise Exception('Username missing')
+			raise Exception('Username missing.')
 		if 's_pw' not in self.query_args:
-			raise Exception('Password missing')
+			raise Exception('Password missing.')
 		if 'command' not in self.query_args:
-			raise Exception('Command missing')
+			raise Exception('Command missing.')
 
 	def sendRequest(self):
 		call_url = self.url + '?' + urllib.parse.urlencode(self.query_args)
