@@ -185,11 +185,14 @@ class UDReselling(object):
 				sys.exit(2)
 
 	def run(self):
-		self.readConfigFile()
-		self.readCmdLineArgs()
-		self.checkRequest()
-		self.sendRequest()
-		self.parseResponse()
+		try:
+			self.readConfigFile()
+			self.readCmdLineArgs()
+			self.checkRequest()
+			self.sendRequest()
+			self.parseResponse()
+		except KeyboardInterrupt:
+			print('Exiting...')
 
 if __name__ == "__main__":
 	udr = UDReselling()
