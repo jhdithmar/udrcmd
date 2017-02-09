@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, urllib, urllib3, re, json, getopt
+import sys, urllib, urllib3, certifi, re, json, getopt
 from pprint import pprint
 
 class splitArgException(Exception):
@@ -12,6 +12,13 @@ class splitArgException(Exception):
 
 class UDReselling(object):
 	def __init__(self, url = 'https://api.domainreselling.de/api/call.cgi', configfile = 'udrcmd.cfg'):
+		try:
+			http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+			http.request('GET', 'https://api.domainreselling.de')
+		except urllib3.exceptions.SSLError:
+			print('Could not verify SSL. Exiting...')
+			sys.exit(2)
+
 		self.url = url
 		self.configfile = configfile
 		self.query_args = {}
