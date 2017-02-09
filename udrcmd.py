@@ -207,6 +207,8 @@ class UDReselling(object):
 			self.printHelp()
 		except KeyboardInterrupt:
 			print('Exiting...')
+		except Exception as ex:
+			print(ex)
 
 if __name__ == "__main__":
 	udr = UDReselling()
