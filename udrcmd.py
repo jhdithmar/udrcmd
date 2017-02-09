@@ -13,8 +13,8 @@ class splitArgException(Exception):
 class UDReselling(object):
 	def __init__(self, url = 'https://api.domainreselling.de/api/call.cgi', configfile = 'udrcmd.cfg'):
 		try:
-			http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-			http.request('GET', 'https://api.domainreselling.de')
+			self.http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
+			self.http.request('GET', 'https://api.domainreselling.de')
 		except urllib3.exceptions.SSLError:
 			print('Could not verify SSL. Exiting...')
 			sys.exit(2)
@@ -127,8 +127,7 @@ class UDReselling(object):
 
 	def sendRequest(self):
 		call_url = self.url + '?' + urllib.parse.urlencode(self.query_args)
-		call = urllib3.PoolManager()
-		result = call.request('GET', call_url)
+		result = self.http.request('GET', call_url)
 		self.raw_response = str(result.data.decode('utf-8'))
 
 	def parseResponse(self):
