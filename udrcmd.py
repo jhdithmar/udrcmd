@@ -184,6 +184,18 @@ class UDReselling(object):
 			else:
 				sys.exit(2)
 
+	def printHelp(self):
+		print('udrcmd.py - the Python3 command line client for the united-domains Reselling API')
+		print('')
+		print('USAGE: udrcmd.py [options] [parameters]')
+		print('')
+		print('options:')
+		print(' -c, --credentials	Asks interactively for your username and password')
+		print(' -l, --login		Your username (cannot be combined with -c/--credentials)')
+		print(' -p, --password		Your password (cannot be combined with -c/--credentials)')
+		print(' -r, --raw-response	Returns raw response as it comes from the API instead of JSON')
+		print('')
+
 	def run(self):
 		try:
 			self.readConfigFile()
@@ -191,6 +203,8 @@ class UDReselling(object):
 			self.checkRequest()
 			self.sendRequest()
 			self.parseResponse()
+		except getopt.GetoptError:
+			self.printHelp()
 		except KeyboardInterrupt:
 			print('Exiting...')
 
