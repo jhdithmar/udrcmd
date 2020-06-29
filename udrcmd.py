@@ -95,8 +95,8 @@ class UDReselling(object):
 						self.addArg(o, arg_list[0])
 
 	def splitArg(self, arg):
-		arg_re = re.compile('\s*=\s*', re.DOTALL | re.M)
-		a = arg_re.split(arg)
+		arg_re = re.compile('=', re.DOTALL | re.M)
+		a = arg_re.split(arg, 1)
 
 		# in this case we don't want to see the traceback
 		try:
